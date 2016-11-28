@@ -420,7 +420,8 @@ const char * TlsCipherSuiteDescription(uint16_t value)
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
     uint16_t I = (value >>8) | (value<<8);
 #endif
-    for (size_t i = 0; sizeof(g_suites); ++i) {
+    size_t g_suites_len = sizeof(g_suites) / sizeof(CipherSuite) - 1;
+    for (size_t i = 0; i < g_suites_len; ++i) {
         if (g_suites[i].value == I)
              return g_suites[i].description;
         if (g_suites[i].value == 0xFFFF)

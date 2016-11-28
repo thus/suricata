@@ -135,6 +135,9 @@ typedef struct SSLStateConnp_ {
     uint16_t version;
     uint8_t content_type;
 
+    uint16_t cipher_suites_length;    /** < Number of cipher suites */
+    uint16_t *cipher_suites;          /** < The lit of cipher suites */
+
     uint8_t handshake_type;
     uint32_t handshake_length;
 
