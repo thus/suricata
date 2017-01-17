@@ -429,7 +429,7 @@ static int DetectTlsSerialTest02(void)
                             certificate, sizeof(certificate));
     FLOWLOCK_UNLOCK(&f);
 
-    SCLogNotice("SERIAL: %s\n", ssl_state->server_connp.cert0_serial)
+    SCLogNotice("SERIAL: %s\n", ssl_state->server_connp.cert0_serial);
 
     FAIL_IF(r != 0);
 
