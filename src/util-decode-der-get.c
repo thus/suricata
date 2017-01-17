@@ -37,6 +37,7 @@
 #include "util-decode-der.h"
 #include "util-decode-der-get.h"
 
+static const uint8_t SEQ_IDX_SERIAL[] = { 0, 0 };
 static const uint8_t SEQ_IDX_ISSUER[] = { 0, 2 };
 static const uint8_t SEQ_IDX_VALIDITY[] = { 0, 3 };
 static const uint8_t SEQ_IDX_SUBJECT[] = { 0, 4 };
@@ -238,6 +239,45 @@ int Asn1DerGetValidity(const Asn1Generic *cert, time_t *not_before,
     rc = 0;
 
 validity_error:
+    return rc;
+}
+
+int Asn1DerGetSerial(const Asn1Generic *cert, char *buffer, uint32_t length,
+                       uint32_t *errcode)
+{
+    const Asn1Generic *node;
+    int rc = -1;
+
+    if (errcode)
+        *errcode = ERR_DER_MISSING_ELEMENT;
+
+    if (length < 10)
+        goto serial_error;
+
+    buffer[0] = '\0';
+
+    node = Asn1DerGet(cert, SEQ_IDX_SERIAL, sizeof(SEQ_IDX_SERIAL), errcode);
+    if ((node == NULL) || node->type != ASN1_INTEGER || node->str == NULL)
+        goto serial_error;
+
+    uint32_t i;
+    uint32_t node_len = strlen(node->str);
+    for (i = 0; i < node_len; i++) {
+        /* insert ":" every two characters, e.g. XX:XX:XX:XX:XX:XX */
+        if ((i & 1) == 0 && i != 0) {
+            strlcat(buffer, ":", length);
+        }
+
+        char c = node->str[i];
+        strlcat(buffer, &c, length);
+    }
+
+    if (errcode)
+        *errcode = 0;
+
+    rc = 0;
+
+serial_error:
     return rc;
 }
 
