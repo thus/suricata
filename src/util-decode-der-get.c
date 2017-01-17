@@ -260,6 +260,8 @@ int Asn1DerGetSerial(const Asn1Generic *cert, char *buffer, uint32_t length,
     if ((node == NULL) || node->type != ASN1_INTEGER || node->str == NULL)
         goto serial_error;
 
+    SCLogNotice("DSERIAL: %s\n", node->str);
+
     uint32_t i;
     uint32_t node_len = strlen(node->str);
     for (i = 0; i < node_len; i++) {
