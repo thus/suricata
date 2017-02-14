@@ -369,6 +369,40 @@ OutputCtx *OutputJsonInitCtx(ConfNode *conf)
         json_ctx->file_ctx->sensor_name = NULL;
     }
 
+    /* Rotate log file based on time */
+    const char *rotate = ConfNodeLookupChildValue(conf, "rotate-interval");
+    if (rotate != NULL) {
+        time_t now = time(NULL);
+        json_ctx->file_ctx->flags |= LOGFILE_ROTATE_INTERVAL;
+
+        /* Use a specific time */
+        if (strcmp(rotate, "minute") == 0) {
+            json_ctx->file_ctx->rotate_time = now +
+                    SCGetSecondsUntil(rotate, now);
+            json_ctx->file_ctx->rotate_interval = 60;
+        } else if (strcmp(rotate, "hour") == 0) {
+            json_ctx->file_ctx->rotate_time = now +
+                    SCGetSecondsUntil(rotate, now);
+            json_ctx->file_ctx->rotate_interval = 3600;
+        } else if (strcmp(rotate, "day") == 0) {
+            json_ctx->file_ctx->rotate_time = now +
+                    SCGetSecondsUntil(rotate, now);
+            json_ctx->file_ctx->rotate_interval = 86400;
+        }
+
+        /* Use a timer */
+        else {
+            json_ctx->file_ctx->rotate_interval = SCParseTimeSizeString(rotate);
+            if (json_ctx->file_ctx->rotate_interval == 0) {
+                SCLogError(SC_ERR_INVALID_NUMERIC_VALUE,
+                           "invalid rotate-interval value");
+                exit(EXIT_FAILURE);
+            }
+            json_ctx->file_ctx->rotate_time = now +
+                    json_ctx->file_ctx->rotate_interval;
+        }
+    }
+
     OutputCtx *output_ctx = SCCalloc(1, sizeof(OutputCtx));
     if (unlikely(output_ctx == NULL)) {
         LogFileFreeCtx(json_ctx->file_ctx);
