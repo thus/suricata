@@ -133,6 +133,14 @@ static int SCLogFileWrite(const char *buffer, int buffer_len, LogFileCtx *log_ct
         SCConfLogReopen(log_ctx);
     }
 
+    if (log_ctx->flags & LOGFILE_ROTATE_INTERVAL) {
+        time_t now = time(NULL);
+        if (now >= log_ctx->rotate_time) {
+            SCConfLogReopen(log_ctx);
+            log_ctx->rotate_time = now + log_ctx->rotate_interval;
+        }
+    }
+
     int ret = 0;
 
     if (log_ctx->fp == NULL && log_ctx->is_sock)
