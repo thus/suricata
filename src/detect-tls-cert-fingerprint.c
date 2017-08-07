@@ -434,6 +434,11 @@ static int DetectTlsFingerprintTest02(void)
                             certificate, sizeof(certificate));
     FLOWLOCK_UNLOCK(&f);
 
+    if (ssl_state->server_connp.cert0_fingerprint != NULL)
+        printf("FINGERPRINT='%s'\n", ssl_state->server_connp.cert0_fingerprint);
+    else
+        printf("FINGERPRINT='Da fuq?'\n");
+
     FAIL_IF(r != 0);
 
     SigMatchSignatures(&tv, de_ctx, det_ctx, p3);
