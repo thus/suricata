@@ -1120,6 +1120,10 @@ static inline int TLSDecodeHSHelloExtensions(SSLState *ssl_state,
         if (!(HAS_SPACE(ext_len)))
             goto invalid_length;
 
+        /* Don't decode empty extensions */
+        if (ext_len == 0)
+            goto next;
+
         parsed = input - initial_input;
 
         switch (ext_type) {
@@ -1206,6 +1210,7 @@ static inline int TLSDecodeHSHelloExtensions(SSLState *ssl_state,
             }
         }
 
+next:
         processed_len += ext_len + 4;
     }
 
